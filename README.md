@@ -1,2 +1,3 @@
 # M2S
-Package to match untargeted LC-MS metabolomics features between two datasets
+Matlab package to match untargeted metabolomic features of two LC-MS datasets 
+Updated 210404
