@@ -1,7 +1,7 @@
 function M2S_plotLinkedPoints(allDotsX,allDotsY,allDotsLinkingIdx,markerTypes,lineTypes,lineColor,xylabels)
 
 if isempty(markerTypes)
-    markerTypes = 'o';
+    markerTypes = '.k';
 end
 if isempty(lineTypes)
     lineTypes = '-';
@@ -14,7 +14,7 @@ end
 
 plot(allDotsX,allDotsY,markerTypes,'MarkerSize',3)
 
-axis tight, grid on, hold on
+hold on
 if length(xylabels)==2
     xlabel(xylabels{1});ylabel(xylabels{2});
 end

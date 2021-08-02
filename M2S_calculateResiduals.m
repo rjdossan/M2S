@@ -1,5 +1,5 @@
 %% Toolbox M2S to match untargeted metabolomics features between two datasets.
-% This function calculates residuals based on...
+% This function calculates residuals 
 
 % function [Residuals_X,Residuals_trendline] = M2S_calculateResiduals(ref_MatchSet, target_MatchSet, refSet, targetSet, Xr_connIdx_inMatchSet, Xr_connIdx, nrNeighbors, neighMethod, plotOrNot)
 function [Residuals_X,Residuals_trendline] = M2S_calculateResiduals ...
@@ -96,7 +96,7 @@ elseif strcmp(neighMethod,'circle')
         MZdist_neighborsTR(:,columnNr) = target_MatchSet(idx_neighbors_Ref(:,columnNr),2) - ref_MatchSet(idx_neighbors_Ref(:,columnNr),2);
         %FIdist_neighborsTR(:,columnNr) = target_MatchSet(idx_neighbors_Ref(:,columnNr),3) - ref_MatchSet(idx_neighbors_Ref(:,columnNr),3);       
     end
-    FIdist_neighborsTR = zeros(size(MZdist_neighborsTR));
+    FIdist_neighborsTR = zeros(size(MZdist_neighborsTR));% defined as zero
     waitbar(1,wb1,'Done!','Name','Info');
     pause(1)
     close(wb1);
@@ -118,16 +118,13 @@ median_FIdist_neighborsTR = nanmedian(FIdist_neighborsTR,2);% REPRESENTS TRENDLI
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if strcmp(neighMethod,'cross')   
     %% Use robust loess to calculate trend (only for "cross" method)
-
     %% LOESS
    
     nrPointsLoess = 0.1 * length(unique(refSet(:,1)));
 
     median_RTdist_neighborsTR = smooth(refSet(:,1),median_RTdist_neighborsTR,nrPointsLoess,'rloess');% to do loess
     median_MZdist_neighborsTR = smooth(refSet(:,2),median_MZdist_neighborsTR,nrPointsLoess,'rloess');% to do loess
-    loessmedian_FIdist_neighborsTRValsFI = smooth(refSet(:,3),median_FIdist_neighborsTR,nrPointsLoess,'rloess');% to do loess
-
-
+    median_FIdist_neighborsTR = smooth(refSet(:,3),median_FIdist_neighborsTR,nrPointsLoess,'rloess');% to do loess
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -158,9 +155,10 @@ featureNr = round(size(refSet,1)/2); % only used for the plot of neighbours of a
 
 if strcmp(neighMethod,'cross')
     
-    % NOTE: to see a plot of the neighbours of a feature,  uncomment the following lines
+    
     
     % Figure to check the neighbours of one of the features
+    % NOTE: to see a plot of the neighbours of a feature,  uncomment the following lines
     temp_idx_neighbours_Ref_RT = (idx_neighbors_Ref_RT(featureNr,:))';
     temp_idx_neighbours_Ref_MZ = (idx_neighbors_Ref_MZ(featureNr,:))';
     temp_idx_neighbours_Ref_FI = (idx_neighbors_Ref_FI(featureNr,:))';
@@ -171,7 +169,7 @@ if strcmp(neighMethod,'cross')
     plot(ref_MatchSet(temp_idx_neighbours_Ref_RT,1),ref_MatchSet(temp_idx_neighbours_Ref_RT,2),'.','Color','r','MarkerSize',14)
     plot(ref_MatchSet(temp_idx_neighbours_Ref_MZ,1),ref_MatchSet(temp_idx_neighbours_Ref_MZ,2),'.','Color','b','MarkerSize',14)
     plot(refSet(featureNr,1),refSet(featureNr,2),'x','Color',greyColor,'MarkerSize',14,'LineWidth',3)
-    plot(nanmedian(ref_MatchSet(temp_idx_neighbours_Ref_RT,1)),nanmedian(ref_MatchSet(temp_idx_neighbours_Ref_RT,2)),'o','Color',greyColor,'MarkerSize',12,'LineWidth',3)
+    plot(nanmedian(ref_MatchSet(temp_idx_neighbours_Ref_RT,1)),nanmedian(ref_MatchSet(temp_idx_neighbours_Ref_MZ,2)),'o','Color',greyColor,'MarkerSize',12,'LineWidth',3)
     xlabel('RT reference (Minutes)'), ylabel('MZ reference (m/z units)'), grid on, axis tight
     subplot(1,4,2)
     plot(ref_MatchSet(:,1),target_MatchSet(:,1)-ref_MatchSet(:,1),'.k'), hold on
@@ -192,6 +190,8 @@ if strcmp(neighMethod,'cross')
     plot(refSet(featureNr,3),nanmedian(target_MatchSet(temp_idx_neighbours_Ref_FI,3)-ref_MatchSet(temp_idx_neighbours_Ref_FI,3)),'o','Color',greyColor,'MarkerSize',12,'LineWidth',3)
     xlabel('log10FI reference (Minutes)'), ylabel('log10FIdist (m/z units)'), grid on, axis tight
     drawnow
+    
+    
     
     % Figure with the trends for RT, MZ, FI
     M2S_figureH(0.65,0.35); set(gcf,'Name','Trends for RT, MZ and log10FI')
@@ -225,6 +225,7 @@ if strcmp(neighMethod,'cross')
 elseif  strcmp(neighMethod,'circle')
     
     % Figure to check the neighbours of one of the features
+    % NOTE: to see a plot of the neighbours of a feature,  uncomment the following lines
     temp_idx_neighbours_Ref = (idx_neighbors_Ref(featureNr,:))';
     M2S_figureH(0.65,0.35); set(gcf,'Name',['Example of neighbours for feature number ',num2str(featureNr)])
     subplot(1,3,1)
@@ -249,6 +250,8 @@ elseif  strcmp(neighMethod,'circle')
     plot(refSet(featureNr,2),nanmedian(target_MatchSet(temp_idx_neighbours_Ref,2)-ref_MatchSet(temp_idx_neighbours_Ref,2)),'o','Color',greyColor,'MarkerSize',12,'LineWidth',3)
     xlabel('MZ reference (Minutes)'), ylabel('MZdist (m/z units)'), grid on, axis tight
     drawnow
+    
+    
     
     % Figure with the trends for RT and MZ
     M2S_figureH(0.65,0.35); set(gcf,'Name','Trends for RT and MZ')

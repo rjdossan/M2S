@@ -13,13 +13,20 @@
 % RT should be in minutes. If it is in seconds, divide it by 60;
 % If there is no feature intensity use a column with ones or random values.
 
+%% Load the data
 
-% NOTE: there are two Plasma Lipid examples below, one in NEG and the other in POS mode
+datasetName = "LNEG"; % {"LNEG","LPOS"}
+
+% NOTE: there are two Plasma Lipid examples, one in NEG and the other in POS mode
 % Only ref and target datasets in the same mode can be matched.
-refFilename = 'test_refFeatures_LNEG_csv.csv';
-% refFilename = 'test_refFeatures_LPOS_csv.csv';
-targetFilename = 'test_targetFeatures_LNEG_csv.csv';
-% targetFilename = 'test_targetFeatures_LPOS_csv.csv';
+
+if datasetName == "LNEG"
+    refFilename = 'test_refFeatures_LNEG_csv.csv';
+    targetFilename = 'test_targetFeatures_LNEG_csv.csv';
+elseif datasetName == "LPOS"
+    refFilename = 'test_refFeatures_LPOS_csv.csv';
+    targetFilename = 'test_targetFeatures_LPOS_csv.csv';
+end
 
 % Function 'importdata.m' loads data from .csv, .txt, or .xlsx 
 
@@ -47,7 +54,7 @@ opt = struct;
 
 %% Set thresholds for matching all features 
 % Try running it with default settings as below, to see the major trends.
-% Default settings: RTthresh < 1 min; MZthresh < 0.025 (m/z); FIthresh < 1000
+% Default settings: RTthresh < 1 min; MZthresh < 0.025 (m/z); log10FIthresh < 1000
 % Later each setting can be set as desired.
 [refSet,targetSet,Xr_connIdx,Xt_connIdx, opt]=M2S_matchAll(refFeatures,targetFeatures);
         
@@ -62,33 +69,38 @@ opt = struct;
 
 % M2S_matchAll SETTINGS:
 
-% Example settings for SLNEG test data
-opt.FIadjustMethod = 'median'; % {'none','median','regression'}
-opt.multThresh.RT_intercept = [-0.55,0.15];
-opt.multThresh.RT_slope = [0 0];
-opt.multThresh.MZ_intercept = [-0.01 0.01]; % m/z units
-opt.multThresh.MZ_slope = [-5e-6 5e-6]; % ppm
-opt.multThresh.log10FI_intercept = [-1000 1000];
-opt.multThresh.log10FI_slope = [0 1];
-
-% Example settings for SLPOS test data
-opt.FIadjustMethod = 'median'; % {'median','regression'}
-opt.multThresh.RT_intercept = [-0.1,0.1];
-opt.multThresh.RT_slope = [0 0];
-opt.multThresh.MZ_intercept = [-0.0075 0.015];
-opt.multThresh.MZ_slope = [-0.01/2000, -0.01/2000];
-opt.multThresh.log10FI_intercept = [-1.4 2.5];
-opt.multThresh.log10FI_slope = [0 0];      
+if datasetName == "LNEG"
+    % Example settings for LNEG test data
+    opt.FIadjustMethod = 'regression'; % {'none','median','regression'}
+    opt.multThresh.RT_intercept = [-0.55,0.15];
+    opt.multThresh.RT_slope = [0 0];
+    opt.multThresh.MZ_intercept = [-0.01 0.01]; % m/z units
+    opt.multThresh.MZ_slope = [-5e-6 5e-6]; % ppm
+    opt.multThresh.log10FI_intercept = [-1 1.5];
+    opt.multThresh.log10FI_slope = [0 1];
+    
+elseif datasetName == "LPOS"
+    % Example settings for LPOS test data
+    opt.FIadjustMethod = 'median'; % {'median','regression'}
+    opt.multThresh.RT_intercept = [-0.1,0.1];
+    opt.multThresh.RT_slope = [0 0];
+    opt.multThresh.MZ_intercept = [-0.0075 0.015];
+    opt.multThresh.MZ_slope = [-0.01/2000, -0.01/2000];
+    opt.multThresh.log10FI_intercept = [-1.4 0.75];
+    opt.multThresh.log10FI_slope = [0 0];    
+    
+end
 
 
 % Match all features within defined thresholds
 
 % Define the plot type as:
 % No plot: plotType = 0
-% Scatter plot: plotType = 1
-% Multiple match plot: plotType = 2 (with lines connecting multiple matches containing the same features)
+% Scatter plots: plotType = 1
+% Multiple match plots: plotType = 2 (with lines connecting multiple
+% matches containing same feature). Also plots a network of all matches.
 
-plotType = 1; % No plot = 0;  Scatter plot = 1, or Multiple match plot = 2
+plotType = 1; 
 [refSet,targetSet,Xr_connIdx,Xt_connIdx,opt]=M2S_matchAll(refFeatures,targetFeatures,opt.multThresh,opt.FIadjustMethod,plotType);
 
 % Obtain properties of current network of matches
@@ -109,26 +121,41 @@ plotType = 1; % No plot = 0;  Scatter plot = 1, or Multiple match plot = 2
 %
 % opt.neighbours.nrNeighbors = 0.01; %as a percentage of the number of features in refSet  
 % opt.neighbours.nrNeighbors = 21; % as a specific number of neighbours
-% opt.calculateResiduals.neighMethod = 'cross'; %{'cross','circle'}
+% opt.calculateResiduals.neighMethod = 'circle'; %{'cross','circle'}
 
-% [Residuals_X,Residuals_trendline] = M2S_calculateResiduals(refSet,targetSet,Xr_connIdx,Xt_connIdx,opt.neighbours.nrNeighbors, opt.calculateResiduals.neighMethod,1)
-[Residuals_X,Residuals_trendline] = M2S_calculateResiduals(refSet,targetSet,Xr_connIdx,Xt_connIdx);
+if datasetName == "LNEG"
+    opt.neighbours.nrNeighbors = 21;
+    opt.calculateResiduals.neighMethod = 'circle';
+    [Residuals_X,Residuals_trendline] = M2S_calculateResiduals(refSet,targetSet,Xr_connIdx,Xt_connIdx,opt.neighbours.nrNeighbors, opt.calculateResiduals.neighMethod,1)
+elseif datasetName == "LPOS"
+    opt.neighbours.nrNeighbors = 0.01;
+    opt.calculateResiduals.neighMethod = 'cross';
+    [Residuals_X,Residuals_trendline] = M2S_calculateResiduals(refSet,targetSet,Xr_connIdx,Xt_connIdx,opt.neighbours.nrNeighbors, opt.calculateResiduals.neighMethod,1)
+end
 
 
 %% Adjust the residuals
 % - The residuals are in different units and need to be standardised
 % to be combined into the penalisation scores for each match.
 % (similar to dividing by standard deviation but using double MAD instead)
-% by the MAD of the residuals, or by the value at a specific percentile (e.g.75%)
+% This is achieved by dividing the residuals by their double MAD , or by the value at a specific percentile (e.g.75%)
 % After this division, the value of the residual at that percentile is 1, so it is easy to visualise the relevance of each of the dimension's residuals (RT/MZ/log10FI).
 %
 % Uses:
-% A: opt.adjustResiduals.residPercentile = NaN % automatic determination using double MAD of Residuals_X. Different value for each dimension. BEST!
-% B: opt.adjustResiduals.residPercentile = [0.05,0.004,1.2]; % These selected residuals values become one (residuals from previous figure "Residuals for RT adn MZ")  
-% C: opt.adjustResiduals.residPercentile = 80;% Percentile value defined by user, can be between ]0,100] 
+% A: Automatic determination using threshold point method. Different value for each dimension. BEST!
+%    opt.adjustResiduals.residPercentile = NaN 
+% B: Set threshold points using residual values. These selected residual values become one 
+%    (residuals from previous figure "Residuals for RT adn MZ")  
+%    opt.adjustResiduals.residPercentile = [0.05,0.004,1.2]; 
+% C: Percentile of the residuals to serve as threshold point, can be between ]0,100]. Same for all dimensions. 
+%    opt.adjustResiduals.residPercentile = 80; 
 
-%[adjResiduals_X,residPercentile] = M2S_adjustResiduals(refSet,targetSet,Residuals_X,opt.adjustResiduals.residPercentile)
-[adjResiduals_X,residPercentile] = M2S_adjustResiduals(refSet,targetSet,Residuals_X);
+if datasetName == "LNEG"
+    opt.adjustResiduals.residPercentile = [0.1,0.01,1.5];
+    [adjResiduals_X,residPercentile] = M2S_adjustResiduals(refSet,targetSet,Residuals_X,opt.adjustResiduals.residPercentile);
+elseif datasetName == "LPOS"
+    [adjResiduals_X,residPercentile] = M2S_adjustResiduals(refSet,targetSet,Residuals_X,NaN);
+end
 
 
 %% Adjust the weight of each dimension (RT, MZ, log10FI), get penalisation scores
@@ -144,6 +171,13 @@ plotType = 1; % No plot = 0;  Scatter plot = 1, or Multiple match plot = 2
 % [penaltyScores] = M2S_defineW_getScores(refSet,targetSet,adjResiduals_X,opt.weights.W,1)
 [penaltyScores] = M2S_defineW_getScores(refSet,targetSet,adjResiduals_X);
 
+if datasetName == "LNEG"
+    opt.weights.W = [1,1,1]; % equal weight
+    [penaltyScores] = M2S_defineW_getScores(refSet,targetSet,adjResiduals_X,opt.weights.W,1); % default
+elseif datasetName == "LPOS"
+    opt.weights.W = [1,1,0.2]; % use log10FI
+    [penaltyScores] = M2S_defineW_getScores(refSet,targetSet,adjResiduals_X,opt.weights.W,1);
+end
 
 %% Decide the best of the multiple matches 
 % -This recursive method focus in a multiple-match cluster at a time, and 
@@ -172,6 +206,19 @@ plotType = 1; % No plot = 0;  Scatter plot = 1, or Multiple match plot = 2
 %
 % [eL_final, eL_final_INFO] =M2S_findPoorMatches(eL,refSet,targetSet,opt.falsePos.methodType,opt.falsePos.nrMad,plotOrNot);
 [eL_final, eL_final_INFO] = M2S_findPoorMatches(eL,refSet,targetSet);
+
+if datasetName == "LNEG"
+    opt.falsePos.methodType = 'trend_mad'; %{'none','scores','byBins','trend_mad','residuals_mad'} 
+    opt.falsePos.nrMad = 5;
+    plotOrNot = 1;
+    [eL_final, eL_final_INFO] = M2S_findPoorMatches(eL,refSet,targetSet,opt.falsePos.methodType,opt.falsePos.nrMad,plotOrNot);
+elseif datasetName == "LPOS"
+    opt.falsePos.methodType = 'scores'; %{'none','scores','byBins','trend_mad','residuals_mad'} 
+    opt.falsePos.nrMad = 5;
+    plotOrNot = 1;
+    [eL_final, eL_final_INFO] = M2S_findPoorMatches(eL,refSet,targetSet,opt.falsePos.methodType,opt.falsePos.nrMad,plotOrNot);
+end
+
 
 % Summary with number of (multiple matches) discarded, false positive and true positive matches
 tableOfMatches = array2table([nansum(isnan(eL_final.notFalsePositives)),nansum(eL_final.notFalsePositives==0),nansum(eL_final.notFalsePositives==1)],'VariableNames',{'DiscardedMatches','PoorMatches','PositiveMatches'});
@@ -216,6 +263,10 @@ orderForData_Target_MZRTstr = M2S_createLabelMZRT('TARGET',targetFeatures(:,2),t
 matchedTargetData_idx = table(orderForData_Target,orderForData_Target_MZRTstr,'VariableNames',{'matchedIdxRef','MZRT_target'});
 
 
+%% Create a function to load data and get the complete dataset
+
+
+
 %% Write a file with these two vectors:
 writetable(matchedRefData_idx,'matchedRefData_idx.xlsx')
 writetable(matchedTargetData_idx,'matchedTargetData_idx.xlsx')
@@ -252,9 +303,9 @@ M2S_colorByY_ofSubplot(subplotNr,figH)
 % Objective: calculate intercept and slope defined by two points.
 % Two ways to use:
 % 1- By clicking on two points in a plot:
-% RTMZFI_slope = M2S_calculateInterceptSlope()
+% interceptSlope = M2S_calculateInterceptSlope()
 % 2- By inserting the values of the two points ([x1,y1],[x2,y2]) as below:
-% RTMZFI_slope = M2S_calculateInterceptSlope([0,0.5],[12,-4.5]);
+% interceptSlope = M2S_calculateInterceptSlope([0,0.5],[12,-4.5]);
 
 %% SUPPORT FUNCTIONS FOR OPTIMISATION
 

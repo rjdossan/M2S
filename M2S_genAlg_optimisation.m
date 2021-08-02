@@ -136,7 +136,7 @@ if plotOrNot >=1
     
     % disp('MAYBE PLOT THE AREAS?')
     MZ_seeds_regionCentre(b,1)
-    plotaxes('-r',
+    %plotaxes('-r',
 end
 
 % Plot one of the seeds with three areas around it
@@ -322,21 +322,35 @@ while bestOneCount < opt.max_bestOneCount && genNr <= opt.max_genNr
     % - nExtraFeaturesInMultMatchClusters_SSQ is the sum of the squared number of extra features in each cluster
     % (not the square of the sum of extra features).
     % It is 1 for a cluster with 3 features; But it is 4 for a cluster with 5 features (3^2), etc.
-    if strcmp(opt.maximisationType,'onlySingle')
-        % Maximise only single matches, do not penalise
-        G.nAdjustedMatches = G.nSingleMatches;% + G.nMultMatchClusters - G.nExtraFeaturesInMultMatchClusters;
-    elseif strcmp(opt.maximisationType,'SingleM')
-        % Maximise only single matches, penalise large multiple match clusters:
-        G.nAdjustedMatches = G.nSingleMatches + G.nMultMatchClusters - G.nExtraFeaturesInMultMatchClusters_SSQ;
-    elseif strcmp(opt.maximisationType,'HalfMultiM')
+    %
+    % Possibilities, from less aggressive to more aggressive:
+        % G.nAdjustedMatches = G.nSingleMatches + 0.5* G.nMultMatchClusters - G.nExtraFeaturesInMultMatchClusters; % A
+        % G.nAdjustedMatches = G.nSingleMatches - (G.nMultMatchClusters - G.nExtraFeaturesInMultMatchClusters).^2; % B 
+        % G.nAdjustedMatches = G.nSingleMatches + 0.5*G.nMultMatchClusters - G.nExtraFeaturesInMultMatchClusters_SSQ; % C
+        % G.nAdjustedMatches = G.nSingleMatches - G.nExtraFeaturesInMultMatchClusters; % D more tight
+        % G.nAdjustedMatches = G.nSingleMatches - (0.5*G.nMultMatchClusters - G.nExtraFeaturesInMultMatchClusters).^2; % E more tight
+        % G.nAdjustedMatches = G.nSingleMatches - G.nExtraFeaturesInMultMatchClusters.^2; % F more tight
+        % G.nAdjustedMatches = G.nSingleMatches - G.nExtraFeaturesInMultMatchClusters_SSQ.^2; % G more tight
+    if strcmp(opt.maximisationType,'A')
+        % Maximise single matches, half of clusters, penalise extra features
+        G.nAdjustedMatches = G.nSingleMatches + 0.5* G.nMultMatchClusters - G.nExtraFeaturesInMultMatchClusters;
+    elseif strcmp(opt.maximisationType,'B')
+        % Maximise single matches, penalise large multiple match clusters:
+        G.nAdjustedMatches = G.nSingleMatches + (G.nMultMatchClusters - G.nExtraFeaturesInMultMatchClusters).^2;
+    elseif strcmp(opt.maximisationType,'C')
         % Maximise both single and multiple match clusters, penalise large clusters
-        G.nAdjustedMatches = G.nSingleMatches + 1.5*G.nMultMatchClusters - G.nExtraFeaturesInMultMatchClusters_SSQ;
-    elseif strcmp(opt.maximisationType,'MultiM')
+        G.nAdjustedMatches = G.nSingleMatches + 0.5*G.nMultMatchClusters - G.nExtraFeaturesInMultMatchClusters_SSQ;
+    elseif strcmp(opt.maximisationType,'D')
         % Maximise both single and multiple match clusters, penalise large clusters
-        G.nAdjustedMatches = G.nSingleMatches + 2*G.nMultMatchClusters - G.nExtraFeaturesInMultMatchClusters_SSQ;
-    elseif strcmp(opt.maximisationType,'Other')
+        G.nAdjustedMatches = G.nSingleMatches - G.nExtraFeaturesInMultMatchClusters;
+    elseif strcmp(opt.maximisationType,'E')
         % Maximise single matches, penalise penalise large clusters
-        % G.nAdjustedMatches = G.inverse_nFeaturesInMultMatchClusters_minus1_SSQ;
+        G.nAdjustedMatches = G.nSingleMatches - (0.5*G.nMultMatchClusters - G.nExtraFeaturesInMultMatchClusters).^2;
+    elseif strcmp(opt.maximisationType,'F')
+        G.nAdjustedMatches = G.nSingleMatches - G.nExtraFeaturesInMultMatchClusters.^2;
+    elseif strcmp(opt.maximisationType,'G') 
+        % Strongest penalisation
+        G.nAdjustedMatches = G.nSingleMatches - G.nExtraFeaturesInMultMatchClusters_SSQ.^2;
         % Using ROC-type of strategy:
         %{
         x = (1/maxN_extraFeatures*G.nExtraFeaturesInMultMatchClusters);
@@ -348,14 +362,7 @@ while bestOneCount < opt.max_bestOneCount && genNr <= opt.max_genNr
          axis([0 1 0 1]), grid on
          xlabel('percentage of extra features'); ylabel('percentage of single matches')
         %}
-        % Possibilities, from less aggressive to more aggressive:
-         G.nAdjustedMatches = G.nSingleMatches + G.nMultMatchClusters - G.nExtraFeaturesInMultMatchClusters;
-        % G.nAdjustedMatches = G.nSingleMatches + 0.5*G.nMultMatchClusters - G.nExtraFeaturesInMultMatchClusters_SSQ;
-        % G.nAdjustedMatches = G.nSingleMatches - (G.nMultMatchClusters - G.nExtraFeaturesInMultMatchClusters).^2; % more tight
-        % G.nAdjustedMatches = G.nSingleMatches - (0.5*G.nMultMatchClusters - G.nExtraFeaturesInMultMatchClusters).^2; % more tight
-        % G.nAdjustedMatches = G.nSingleMatches - G.nExtraFeaturesInMultMatchClusters; % more tight
-        % G.nAdjustedMatches = G.nSingleMatches - G.nExtraFeaturesInMultMatchClusters.^2; % more tight
-        % G.nAdjustedMatches = G.nSingleMatches - G.nExtraFeaturesInMultMatchClusters_SSQ.^2; % more tight
+        
         tempT = table((1:length(G.nSingleMatches))',G.nSingleMatches, G.nMultMatchClusters, G.nExtraMatchesInMultMatchClusters,G.nAdjustedMatches,...
             'VariableNames',{'idx','nSingleMatches','nMultMatchClusters','nExtraMatchesInMultMatchClusters','nAdjustedMatches'});
         sortrows(tempT,'nAdjustedMatches','descend')

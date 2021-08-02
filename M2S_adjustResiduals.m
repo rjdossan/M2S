@@ -39,13 +39,13 @@ targetSet(:,3) = log10(targetSet(:,3));
 % Needs only the Residuals_X
 
 if sum (isnan(residPercentile))>0 % IF there is at least one NaN in residPercentile
-    disp('Method choice: residPercentile automatically defined using double MAD')
+    disp('Method choice: residPercentile automatically defined using a threshold point')
     percentileThresh = NaN(1,3); residPercentile=NaN(1,3);
-    [S_RT,percentileThresh(1,1)] = M2S_threshSelection(sqrt((Residuals_X(:,1)).^2),'mad',3,0);
+    [S_RT,percentileThresh(1,1)] = M2S_threshSelection((Residuals_X(:,1)),'mad',3,0);
     residPercentile(1,1)= 100 *percentileThresh(1,1);
-    [S_MZ,percentileThresh(1,2)] = M2S_threshSelection(sqrt((Residuals_X(:,2)).^2),'mad',3,0);
+    [S_MZ,percentileThresh(1,2)] = M2S_threshSelection((Residuals_X(:,2)),'mad',3,0);
     residPercentile(1,2)= 100 *percentileThresh(1,2);
-    [S_logFI,percentileThresh(1,3)] = M2S_threshSelection(sqrt((Residuals_X(:,3)).^2),'mad',3,0);
+    [S_logFI,percentileThresh(1,3)] = M2S_threshSelection((Residuals_X(:,3)),'mad',3,0);
     residPercentile(1,3)= 100 *percentileThresh(1,3);   
     absResid_atPercentile = [S_RT.S_limit, S_MZ.S_limit,S_logFI.S_limit];% absolute residual value
     % Normalize residuals by dividing by the residual value at specified percentile (similar to z-scoring)

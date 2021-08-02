@@ -290,47 +290,48 @@ else
         end
         
         %% Create a GRAPH with all matches 
+        if plotType == 2
+            CC = struct;
+            MZRTstr_Ref = M2S_createLabelMZRT('REF',refSet_i(:,2),refSet_i(:,1));
+            MZRTstr_Target = M2S_createLabelMZRT('TARGET',targetSet_i(:,2),targetSet_i(:,1));
+            eL_allMatches = [table([MZRTstr_Ref,MZRTstr_Target],'VariableNames',{'EndNodes'}), ...
+                table((1:length(Xr_connIdx_i))','VariableNames',{'rowNrInMatchedSets'})];
+            G1_temp = graph(eL_allMatches);% Only for connected components
+            G1 = digraph(eL_allMatches);
+            % Find if node is reference node
+            G1.Nodes.refNode = double(contains(G1.Nodes.Name,'REF'));
+            % Find in which cluster the node is
+            G1.Nodes.CCnr = (conncomp(G1_temp))';
+            % Find in which cluster the edge is
+            G1.Edges.CCnr = G1.Nodes.CCnr(M2S_find_idxInReference(G1.Edges.EndNodes(:,1),G1.Nodes.Name));
 
-        CC = struct;
-        MZRTstr_Ref = M2S_createLabelMZRT('REF',refSet_i(:,2),refSet_i(:,1));
-        MZRTstr_Target = M2S_createLabelMZRT('TARGET',targetSet_i(:,2),targetSet_i(:,1));
-        eL_allMatches = [table([MZRTstr_Ref,MZRTstr_Target],'VariableNames',{'EndNodes'}), ...
-            table((1:length(Xr_connIdx_i))','VariableNames',{'rowNrInMatchedSets'})];
-        G1_temp = graph(eL_allMatches);% Only for connected components
-        G1 = digraph(eL_allMatches);
-        % Find if node is reference node
-        G1.Nodes.refNode = double(contains(G1.Nodes.Name,'REF'));
-        % Find in which cluster the node is
-        G1.Nodes.CCnr = (conncomp(G1_temp))';
-        % Find in which cluster the edge is
-        G1.Edges.CCnr = G1.Nodes.CCnr(M2S_find_idxInReference(G1.Edges.EndNodes(:,1),G1.Nodes.Name));
-        
-        % Find number of nodes and edges in each cluster
-        CC.nNodes = tabulate(G1.Nodes.CCnr); CC.nNodes = CC.nNodes(:,1:2);
-        CC.nEdges = tabulate(G1.Edges.CCnr); CC.nEdges = CC.nEdges(:,1:2);
-        
-        % nExtraFeaturesInCC = CC.nNodes(:,2)-2;
-        
-        % Find number of clusters with N nodes or N edges
-        CC.freq_clustersWithNnodes = tabulate(CC.nNodes(:,2));
-        CC.freq_clustersWithNedges = tabulate(CC.nEdges(:,2));
-        
-        % Find how many nodes & edges are in the same cluster as each node
-        G1.Nodes.nrNodesInCC = CC.nNodes(M2S_find_idxInReference(G1.Nodes.CCnr,CC.nNodes(:,1)),2);
-        G1.Nodes.nrEdgesInCC = CC.nEdges(M2S_find_idxInReference(G1.Nodes.CCnr,CC.nEdges(:,1)),2);
-        
-        % Find how many nodes & edges are in the same cluster as each edge
-        G1.Edges.nrNodesInCC = CC.nNodes(M2S_find_idxInReference(G1.Edges.CCnr,CC.nNodes(:,1)),2);
-        G1.Edges.nrEdgesInCC = CC.nEdges(M2S_find_idxInReference(G1.Edges.CCnr,CC.nEdges(:,1)),2);
-        
-        M2S_figureH(0.6,0.8);
-        set(gcf,'Name','Nodes as metabolomic features: Reference in dark blue, Target in light blue. Grey edges are matches within all thresholds, orange edges are matches outside log10FI threshold.')
-        movegui(gcf,'center')
-        p1 = plot(G1,'LineWidth',2,'EdgeColor',M2Scolor.lgrey); 
-        highlight(p1,find(G1.Nodes.refNode==1),'NodeColor',M2Scolor.dblue,'MarkerSize',3);
-        highlight(p1,find(G1.Nodes.refNode==0),'NodeColor',M2Scolor.lblue,'MarkerSize',3);
-        highlight(p1,find(G1.Edges.rowNrInMatchedSets(FIdistOK_01==0)),'EdgeColor',M2Scolor.orange,'LineWidth',1.5)
-        set(gca,'XTick',[], 'YTick', []); axis tight; drawnow;
+            % Find number of nodes and edges in each cluster
+            CC.nNodes = tabulate(G1.Nodes.CCnr); CC.nNodes = CC.nNodes(:,1:2);
+            CC.nEdges = tabulate(G1.Edges.CCnr); CC.nEdges = CC.nEdges(:,1:2);
+
+            % nExtraFeaturesInCC = CC.nNodes(:,2)-2;
+
+            % Find number of clusters with N nodes or N edges
+            CC.freq_clustersWithNnodes = tabulate(CC.nNodes(:,2));
+            CC.freq_clustersWithNedges = tabulate(CC.nEdges(:,2));
+
+            % Find how many nodes & edges are in the same cluster as each node
+            G1.Nodes.nrNodesInCC = CC.nNodes(M2S_find_idxInReference(G1.Nodes.CCnr,CC.nNodes(:,1)),2);
+            G1.Nodes.nrEdgesInCC = CC.nEdges(M2S_find_idxInReference(G1.Nodes.CCnr,CC.nEdges(:,1)),2);
+
+            % Find how many nodes & edges are in the same cluster as each edge
+            G1.Edges.nrNodesInCC = CC.nNodes(M2S_find_idxInReference(G1.Edges.CCnr,CC.nNodes(:,1)),2);
+            G1.Edges.nrEdgesInCC = CC.nEdges(M2S_find_idxInReference(G1.Edges.CCnr,CC.nEdges(:,1)),2);
+
+            M2S_figureH(0.6,0.8);
+            set(gcf,'Name','Nodes as metabolomic features: Reference in dark blue, Target in light blue. Grey edges are matches within all thresholds, orange edges are matches outside log10FI threshold.')
+            movegui(gcf,'center')
+            p1 = plot(G1,'LineWidth',2,'EdgeColor',M2Scolor.lgrey); 
+            highlight(p1,find(G1.Nodes.refNode==1),'NodeColor',M2Scolor.dblue,'MarkerSize',3);
+            highlight(p1,find(G1.Nodes.refNode==0),'NodeColor',M2Scolor.lblue,'MarkerSize',3);
+            highlight(p1,find(G1.Edges.rowNrInMatchedSets(FIdistOK_01==0)),'EdgeColor',M2Scolor.orange,'LineWidth',1.5)
+            set(gca,'XTick',[], 'YTick', []); axis tight; drawnow;
+        end
     end
 end
 

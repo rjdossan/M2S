@@ -35,7 +35,7 @@ if plotNetOrNot == 1 % plot with less information
     M2S_figureH(0.65,0.9)
     set(gcf,'Name','All matches (edges) colored by penalty scores. Metabolomic features (nodes) of Reference in black, Target features in red');
     movegui(gcf,'center')
-    f1 = plot(G1,'EdgeCData',G1.Edges.matchScore,'LineWidth',2); 
+    f1 = plot(G1,'interpreter','None','EdgeCData',G1.Edges.matchScore,'LineWidth',2); 
     colorbar('Location','southoutside'), xlabel('Penalisation scores')
     highlight(f1,find(G1.Nodes.refNode==1),'NodeColor','k','MarkerSize',3);
     highlight(f1,find(G1.Nodes.refNode==0),'NodeColor','b','MarkerSize',3);
