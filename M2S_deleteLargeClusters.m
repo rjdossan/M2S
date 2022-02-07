@@ -1,9 +1,10 @@
 %% This function creates a ref and target featureSets (unmatched) from 
-% refSet and targetSet obtained from matching. It removes large clusters
-% from those matched sets. It then makes it easier to find thresholds with 
+% refSet and targetSet obtained from matching. It removes large clusters 
+% (with more than maxFeaturesInCluster features in cluster) from those 
+% matched sets. It then makes it easier to find thresholds with 
 % genetic algorithm or manually
 
-function [refFeatures_noBigClusters,targetFeatures_noBigClusters] = M2S_deleteLargeClusters(refSet,targetSet,maxFeaturesInCluster,opt)
+function [refFeatures_noBigClusters,targetFeatures_noBigClusters,refSet_noBigClusters,targetSet_noBigClusters,Xr_connIdx_noBigClusters,Xt_connIdx_noBigClusters, opt_noBigClusters] = M2S_deleteLargeClusters(refSet,targetSet,maxFeaturesInCluster,opt)
 
 M2S_figureH(0.9,0.6);
 set(gcf,'Name','Initial data with all features')
@@ -43,6 +44,6 @@ set(gca,'XTick',[], 'YTick', []); axis tight; drawnow;
 title('Ref nodes in dark blue : Target nodes in light blue')
 
 
-M2S_matchAll(refFeatures_noBigClusters,targetFeatures_noBigClusters,opt.multThresh,opt.FIadjustMethod,2);
+[refSet_noBigClusters,targetSet_noBigClusters,Xr_connIdx_noBigClusters,Xt_connIdx_noBigClusters, opt_noBigClusters] = M2S_matchAll(refFeatures_noBigClusters,targetFeatures_noBigClusters,opt.multThresh,opt.FIadjustMethod,2);
 %close
 

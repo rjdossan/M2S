@@ -1,14 +1,25 @@
-%% Create or position a figure in the centre of the screen
+function figureH = M2S_figureH(widthPercent,heightPercent,figH)
+%% M2S_figureH
+% Create or position a figure in the centre of the screen
+% 
+% figureH = M2S_figureH(widthPercent,heightPercent,figH)
+%
+% INPUT:
 % To create:
 % figureH = M2S_figureH(widthPercent,heightPercent)
 % To position
 % figureH = M2S_figureH(widthPercent,heightPercent,figH)
+% NOTE: widthPercent and heightPercent are between 0 and 1
 %
-% widthPercent and heightPercent are between 0 and 1
+% OUTPUT
+% figureH: figure handle
+%
+% M2S toolbox to match LCMS metabolomics features of untargeted datasets.
+% *** Rui Climaco Pinto ***
+% *** Imperial College London, 2021 ***
 
-function figureH = M2S_figureH(widthPercent,heightPercent,figH)
 
-%Ensure root units are pixels and get the size of the screen:
+% Ensure root units are pixels and get the size of the screen:
 set(0,'Units','pixels') 
 scnsize = get(0,'ScreenSize');
 

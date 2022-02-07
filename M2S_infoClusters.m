@@ -1,5 +1,15 @@
 function [G1,CC] = M2S_infoClusters(refSet,targetSet,dimNr,line_style)
+% [G1,CC] = M2S_infoClusters(refSet,targetSet,dimNr,line_style)
+% Function to inspect the results of matching.
+%NOTE: at this point this only works for dimNr <= 2
 
+% dimNr:
+% 1=RT; 2=MZ; 3=log10FIdist vs log10FIref; 4 = log10FItarget vs log10FIref;
+% line_style = {':','-'}
+
+if dimNr>2
+    error('dimNr must be 1 or 2')
+end
 
 if dimNr == 1
     dimLabel = 'RT';
@@ -113,10 +123,15 @@ set(clb, 'ticks',nTicksPoints , 'ticklabels', cellstr(num2str((1:nColours)')));
 %subplot(1,3,1)
 M2S_figureH(.6,.6);
 set(gcf,'Name','Dots represent matches. Clusters of matches with same features are connected by lines.')
-title('Dots coloured by number of features in cluster. Lines coloured by number of matches in cluster')
-movegui(gcf,'center')
-scatter(refSet(:,dimNr),targetSet(:,dimNr)-refSet(:,dimNr),20*ones(size(refSet,1),1),G1.Edges.nrNodesInCC,'filled')
+% title('Dots coloured by number of features in cluster. Lines coloured by number of matches in cluster')
+if dimNr <=2
+    scatter(refSet(:,dimNr),targetSet(:,dimNr)-refSet(:,dimNr),20*ones(size(refSet,1),1),G1.Edges.nrNodesInCC,'filled')
 % scatter(refSet(:,dimNr),targetSet(:,dimNr)-refSet(:,dimNr),20*ones(size(refSet,1),1),M2Scolormap_local(G1.Edges.nrNodesInCC),'filled')
+elseif dimNr == 3
+    scatter(log10(refSet(:,dimNr)),log10(targetSet(:,dimNr))-log10(refSet(:,dimNr)),20*ones(size(refSet,1),1),G1.Edges.nrNodesInCC,'filled')
+elseif dimNr == 4
+    scatter(log10(refSet(:,3)),log10(targetSet(:,3)),20*ones(size(refSet,1),1),G1.Edges.nrNodesInCC,'filled')
+end
 axis tight, grid on 
 %scatter(refSet(:,1),targetSet(:,1)-refSet(:,1),16*ones(size(refSet,1),1),G1.Edges.nrNodesInCC,'filled')
 hold on
@@ -198,7 +213,11 @@ colormap(M2Scolormap_local); caxis([1,nColours]); clb = colorbar;
 nTicksPoints = (linspace(1,nColours,2*nColours+1))'; nTicksPoints = nTicksPoints(2:2:end);
 set(clb, 'ticks',nTicksPoints , 'ticklabels', cellstr(num2str((1:nColours)')));
 xlabel(xdimLabel); ylabel(ydimLabel);
+title('Dots coloured by number of features in cluster. Lines coloured by number of matches in cluster')
 
+
+%% This works but is not used
+%{
 
 % Edge features (e.g. RTdist) distances for the target features matching the same reference
 RTref_sameRefFeature = refSet([connectedMatches_global_idx1r;connectedMatches_global_idx2r],1);
@@ -233,7 +252,7 @@ scatter(MZref_sameRefFeature,MZdist_sameRefFeature,18*ones(size(MZdist_sameRefFe
 subplot(1,3,3)
 plot(log10(refSet(:,3)),log10(targetSet(:,3))-log10(refSet(:,3)),'.k'), hold on
 scatter(FIref_sameRefFeature,FIdist_sameRefFeature,18*ones(size(FIdist_sameRefFeature)),FI_penaltyScore,'filled'), axis tight, grid on
-
+%}
 
 
 % figure, plot(RTdist_sameRefFeature,abs(diffRT_sameRefFeature),'.'), grid on, axis tight

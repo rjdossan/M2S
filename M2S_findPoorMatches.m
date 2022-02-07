@@ -46,7 +46,7 @@ grpColor = 'brk';
 grpMarker = 'so.';
 grpMarkerSize = [4,4,8];
 M2S_figureH(0.8,0.5);
-set(gcf,'Name','Method 2: Not matched (blue), poor matches (red) and  (black)'); 
+set(gcf,'Name','Method - scores: Not matched (blue), poor matches (red) and good matches (black)'); 
 for g=1:3
     %find row indices of refSet
     if g==1
@@ -70,8 +70,9 @@ subplot(1,3,3), xlabel('log10FIreference'), ylabel('log10FIdist')
 
 %% Method 2: recalculate residuals only for best matches. Find threshold limit in RT, MZ and FI
 elseif strcmp(methodType,'byBins')
-%[ResidualsReset,trendsReset] = M2S_calculateResiduals(refSet(eL_Best.rowNrInMatchedSets,:), targetSet(eL_Best.rowNrInMatchedSets,:), refSet(eL_Best.rowNrInMatchedSets,:), targetSet(eL_Best.rowNrInMatchedSets,:), (1:length(eL_Best.Xr_connIdx))', (1:length(eL_Best.Xr_connIdx))', round(0.01*size(eL_Best,1)), 'cross', 0);
-[ResidualsReset,trendsReset] = M2S_calculateResiduals(refSet(eL_Best.rowNrInMatchedSets,:), targetSet(eL_Best.rowNrInMatchedSets,:), eL_Best.Xr_connIdx, eL_Best.Xt_connIdx,  round(0.01*size(eL_Best,1)), 'cross', 0);
+%[Residuals_X,Residuals_trendline] = M2S_calculateResiduals(refSet,targetSet,Xr_connIdx,Xt_connIdx,nrNeighbors, neighMethod,pctPointsLoess,plotTypeResiduals)
+[ResidualsReset,trendsReset] = M2S_calculateResiduals(refSet(eL_Best.rowNrInMatchedSets,:), targetSet(eL_Best.rowNrInMatchedSets,:), eL_Best.Xr_connIdx, eL_Best.Xt_connIdx,  round(0.01*size(eL_Best,1)), 'cross', 0, 0);
+
 
 ResidualsReset_abs = abs(ResidualsReset);
 nBins = 5;
@@ -160,7 +161,7 @@ eL.notFalsePositives(find(eL.is_Worst)) = NaN;
 
 if plotOrNot == 1
 M2S_figureH(0.8,0.5);
-set(gcf,'Name','Method 2: Not matched (blue), false positives (red) and true positives (black)')
+set(gcf,'Name','Method - byBins: Not matched (blue), false positives (red) and good matches (black)')
 subplot(1,3,1), 
 %plot(refSet(:,1),targetSet(:,1)-refSet(:,1),'k.')
 hold on, axis tight, grid on, 
@@ -211,8 +212,8 @@ end
 elseif strcmp(methodType,'trend_mad')
 % recalculate residuals only for best matches. Use defined threshold limit in RT, MZ and FI
 
-%[ResidualsReset,trendsReset] = M2S_calculateResiduals(refSet(eL_Best.rowNrInMatchedSets,:), targetSet(eL_Best.rowNrInMatchedSets,:), refSet(eL_Best.rowNrInMatchedSets,:), targetSet(eL_Best.rowNrInMatchedSets,:), (1:length(eL_Best.Xr_connIdx))', (1:length(eL_Best.Xr_connIdx))', round(0.01*size(eL_Best,1)), 'cross', 0);
-[ResidualsReset,trendsReset] = M2S_calculateResiduals(refSet(eL_Best.rowNrInMatchedSets,:), targetSet(eL_Best.rowNrInMatchedSets,:), eL_Best.Xr_connIdx, eL_Best.Xt_connIdx,  round(0.01*size(eL_Best,1)), 'cross', 0);
+%[Residuals_X,Residuals_trendline] = M2S_calculateResiduals(refSet,targetSet,Xr_connIdx,Xt_connIdx,nrNeighbors, neighMethod,pctPointsLoess,plotTypeResiduals)
+[ResidualsReset,trendsReset] = M2S_calculateResiduals(refSet(eL_Best.rowNrInMatchedSets,:), targetSet(eL_Best.rowNrInMatchedSets,:), eL_Best.Xr_connIdx, eL_Best.Xt_connIdx,  round(0.01*size(eL_Best,1)), 'cross',0, 0);
 
 median_Residuals = nanmedian(ResidualsReset);
 mad_Residuals =   mad(ResidualsReset);
@@ -230,7 +231,7 @@ eL.notFalsePositives(find(eL.is_Worst)) = NaN;
 
 if plotOrNot == 1
 M2S_figureH(0.8,0.5);
-set(gcf,'Name','Method 3: Not matched (blue), false positives (red) and true positives (black)')
+set(gcf,'Name','Method - trend_mad: Not matched (blue), false positives (red) and good matches (black)')
 subplot(1,3,1), 
 %plot(refSet(:,1),targetSet(:,1)-refSet(:,1),'k.')
 hold on, axis tight, grid on, 
@@ -283,7 +284,7 @@ elseif strcmp(methodType,'residuals_mad')
 % Then one can consider the trend is zero for all dimensions.
 % One can pchip x=[minRT, medianRT, maxRT] and use  y = nrMad * mad;
 % [ResidualsReset,trendsReset] = M2S_calculateResiduals(refSet(eL_Best.rowNrInMatchedSets,:), targetSet(eL_Best.rowNrInMatchedSets,:), refSet(eL_Best.rowNrInMatchedSets,:), targetSet(eL_Best.rowNrInMatchedSets,:), (1:length(eL_Best.Xr_connIdx))', (1:length(eL_Best.Xr_connIdx))', round(0.01*size(eL_Best,1)), 'cross', 0);
-[ResidualsReset,trendsReset] = M2S_calculateResiduals(refSet(eL_Best.rowNrInMatchedSets,:), targetSet(eL_Best.rowNrInMatchedSets,:), eL_Best.Xr_connIdx, eL_Best.Xt_connIdx,  round(0.01*size(eL_Best,1)), 'cross', 0);
+[ResidualsReset,trendsReset] = M2S_calculateResiduals(refSet(eL_Best.rowNrInMatchedSets,:), targetSet(eL_Best.rowNrInMatchedSets,:), eL_Best.Xr_connIdx, eL_Best.Xt_connIdx,  round(0.01*size(eL_Best,1)), 'cross',0, 0);
 
 % [ResidualsReset,trendsReset] = M2S_calculateResiduals(refSet(eL_Best.rowNrInMatchedSets,:), targetSet(eL_Best.rowNrInMatchedSets,:), refSet(eL_Best.rowNrInMatchedSets,:), targetSet(eL_Best.rowNrInMatchedSets,:), (1:length(eL_Best.Xr_connIdx))', (1:length(eL_Best.Xr_connIdx))', round(0.01*size(eL_Best,1)), 'cross', 0);
 median_Residuals = nanmedian(ResidualsReset);
@@ -308,7 +309,7 @@ eL.notFalsePositives(refSet_falsePosIdx) = 0;
 if plotOrNot == 1
 
 M2S_figureH(0.8,0.5);
-set(gcf,'Name','Method 4: Residuals of false positives (red) and true positives (black)')
+set(gcf,'Name','Method - residuals_mad: Residuals of false positives (red) and good matches (black)')
 subplot(1,3,1)
 plot([min(refSet(eL_Best.rowNrInMatchedSets,1));max(refSet(eL_Best.rowNrInMatchedSets,1))],[lowLimit(1,1);lowLimit(1,1)],'-r')
 hold on, axis tight, grid on
@@ -352,7 +353,6 @@ eL_final_INFO{6,1} = '- nrIterations shows the number of iterations needed until
 eL_final_INFO{7,1} = 'were no other possible matches for the two features in it. NaN means it was never selected as a good match.';
 eL_final_INFO{8,1} = '- is_Best indicates if this match was chosen as a good one during the iterative scores selection (even if not in the first iteration)';
 eL_final_INFO{9,1} = '- is_Worst indicates that this match was not selected after the iterative process.';
-eL_final_INFO{10,1} = '- notFalsePositives indicates the false positives (==0), the true positives (==1) and the discarded matches (==NaN).';
-%eL_INFO(5).text = 'is_GoodClass/is_BadClass/is_toPredict (is_toPredict=is_Best) is ready for preparing discriminant model';
+eL_final_INFO{10,1} = '- notFalsePositives indicates the poor matches (==0), the good matches (==1) and the discarded matches (==NaN).';
 
 eL_final = eL;

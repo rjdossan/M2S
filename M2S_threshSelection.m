@@ -1,46 +1,41 @@
+%[S_result,percentileThresh] = M2S_threshSelection(S, methodType, pAlpha_or_nrMad, plotOrNot)
 % M2S_threshSelection
 % This function is used in the context of matching features between untargeted metabolomics datasets.
-% It uses a concept similar to the double MAD.
-%
+% It finds the values to normalise each dimension
+% 
+% INPUT:
+% S: The values to find the median and mad
+% methodType: at the moment there is only "mad"
+% pAlpha_or_nrMad: the number of mad desired
+% plotOrNot: 0 - no plots; 1 - plots
+% OUTPUT
+% S_result: 
+% percentileThresh: the threshold in percentile of the initial values
 
 function [S_result,percentileThresh] = M2S_threshSelection(S, methodType, pAlpha_or_nrMad, plotOrNot)
 
-% NOTE: if method is "mad", pAlpha_or_nrMad is nrMad (e.g. 3).
-% S = RTMZdist_medNeigh_to_TRpair_scaled(eL.is_Best==1);
-
-plotOrNotIterations = 0; % This is in case one wants to plot all the iterations to visualise Method 1.
 
 if nargin ==1
     methodType = 'mad';
     pAlpha_or_nrMad = 3;
     plotOrNot = 1;
-
 elseif nargin == 2
-%     if strcmp(methodType,'outliers')
-%         pAlpha_or_nrMad = 0.01;
     if strcmp(methodType,'mad')
         pAlpha_or_nrMad = 3;
     else
         disp('The selected methodType does not exist')
     end
     plotOrNot = 1;
-
 elseif  nargin == 3
         plotOrNot = 1;
 end
 
 %% ******************************************************************
 if strcmp(methodType,'mad')
-% Leys, C., et al., Detecting outliers: Do not use standard deviation around the mean, use absolute deviation around the median, Journal of Experimental Social Psychology, Volume 49, Issue 4, July 2013, pp. 764-766. *
-% Rousseeuw, P.J. and Croux C. (1993) Alternatives to the Median Absolute Deviation, Journal of the American Statistical Association, December 1993, pp. 1273-1283.    
-    
+   
     % determine the double MAD
     percentForNbins=0.1;
-    % pAlpha_or_nrMad = 3;
-    % high_S_idx = (1:length(S))'; %find(S>nanmedian(S));
-    % high_S = S(high_S_idx);% 
     y_S = S + 0.05 *range(S) .* rand(size(S));% only for the plot
-
     
     % OUTPUT
     S_limit = (median(S) + mad(S)*pAlpha_or_nrMad);

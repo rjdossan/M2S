@@ -1,13 +1,17 @@
+function [refSet,targetSet,Xr_connIdx,Xt_connIdx,opt]=M2S_matchAll(refFeatures,targetFeatures,multThresh,FIadjustMethod,plotType)
 %% M2S_matchAll
 % Function to calculate matches between two LCMS datasets according to 
-% specified RT/MZ/log10FI distances between the features in the two datasets.
-% Matches are sets of two molecular features that are less distant than defined RT (min), MZ (ppm) log10FI thresholds,
-% meaning the two features may potentially be the same molecular species.
-% It may find multiple Matches for the same feature.
-
+% specified RT/MZ/log10FI distances between the features in two datasets.
 %
-% *** INPUT ***
-% refFeatures,targetFeatures: two matrices of [RT,MZ,FI] with variable info.
+% Background:
+% Matches are sets of two molecular features that are less distant than
+% defined RT (min), MZ (ppm), log10FI thresholds, meaning the two features
+% may potentially be the same molecular species. It may find multiple
+% matches for the same feature.
+%
+%
+% INPUT:
+% refFeatures, targetFeatures: two matrices of [RT,MZ,FI] 
 % RT is a column of retention time in minutes
 % MZ is a column of m/z in m/z units
 % FI is the feature intensity (peak area)
@@ -22,45 +26,49 @@
 % multThresh.log10FI_intercept = 1000; 
 % multThresh.log10FI_slope = 0;
 %
-%
 % FIadjustMethod: method to adjust the FI of target to reference {'none','median','regression'}
-% The 'median' method simply subtracts the median of ref to target.
-% The 'regression' method adjust target to ref using linear regression.
+% The 'none' (default) method does not do anything
+% The 'median' method simply subtracts the median of ref to target, including all multiple matches.
+% The 'regression' method adjust target to ref using linear regression, including all multiple matches.
 %
+% plotType: 0 - no plots; 1 - (default) plots of feature intensity and of
+% matches; 2 - plots of feature intensity, multiple matches, and network of matches
 %
-% *** OUTPUT ***
-% refSet, targetSet: matched sets, with non-unique entries.
-% Xr_connIdx,Xt_connIdx: non-unique indices of the features in the matched sets above.
+% OUTPUT:
+% refSet, targetSet: matched sets, with non-unique features in each set.
+% Xr_connIdx, Xt_connIdx: non-unique indices (in refFeatures, targetFeatures)
+% of the features in each match.
+%
 % opt: The options in use.
 %
 % EXAMPLES
 % [refSet,targetSet,Xr_connIdx,Xt_connIdx, opt]=M2S_matchAll(refFeatures,targetFeatures);
-% [refSet,targetSet,Xr_connIdx,Xt_connIdx,opt]=M2S_matchAll(refFeatures,targetFeatures,opt.multThresh,'median',2);
+% [refSet,targetSet,Xr_connIdx,Xt_connIdx,opt]=M2S_matchAll(refFeatures,targetFeatures,definedThresholds,'median',2);
 %
-% *************************************************************************
-% Rui CLIMACO PINTO
-% Imperial College London 2021
-% *************************************************************************
+% M2S toolbox to match LCMS metabolomics features of untargeted datasets.
+% *** Rui Climaco Pinto ***
+% *** Imperial College London, 2021 ***
 
-function [refSet,targetSet,Xr_connIdx,Xt_connIdx,opt]=M2S_matchAll(refFeatures,targetFeatures,multThresh,FIadjustMethod,plotType)
+
 
 
 
 if nargin == 2
-    multThresh.MZ_intercept = 0.025;
+    multThresh.MZ_intercept = 0.02;
     multThresh.MZ_slope = 0;
-    multThresh.RT_intercept = 1;
+    multThresh.RT_intercept = abs(max([refFeatures(:,1);targetFeatures(:,1)])-min([targetFeatures(:,1);refFeatures(:,1)]));
     multThresh.RT_slope = 0;
     multThresh.log10FI_intercept = 1000; 
     multThresh.log10FI_slope = 0;
     multThresh.selfMatchingOrNot = 0;% May exist or not
-    FIadjustMethod = 'median';
+    FIadjustMethod = 'none';
     plotType = 1;
 elseif nargin == 3    
-    FIadjustMethod = 'median';
+    FIadjustMethod = 'none';
     plotType = 1;
 elseif nargin == 4
-    FIadjustMethod = 'median';
+    %FIadjustMethod = 'median';
+    plotType = 1;
 end
 
 opt.multThresh = multThresh;
@@ -211,7 +219,7 @@ else
         if plotType == 1
 
             M2S_figureH(0.8,0.5);
-            set(gcf,'Name','Black dots represent matches within threshold, blue circles highlight multiple matches, orange dots are matches outside log10FI threshold.')
+            set(gcf,'Name','Black dots represent matches within threshold, blue circles highlight multiple matches, orange dots are matches outside log10FI threshold.');
             % PLOT: RTdist vs RTref
             subplot(1,3,1)
 %             fill([0; max(refSet_i(:,1));  max(refSet_i(:,1)); 0],...
@@ -254,7 +262,7 @@ else
             elseif plotType == 2 % SHOW MULTIPLE MATCHES CONNECTIONS
 
             M2S_figureH(0.8,0.5);
-            set(gcf,'Name','Black dots represent matches within threshold, blue squares highlight multiple matches, orange dots are matches outside log10FI threshold. Dotted lines: blue when a reference feature matches two or more target features; Orange for the opposite.')
+            set(gcf,'Name','Black dots represent matches within threshold, blue squares highlight multiple matches, orange dots are matches outside log10FI threshold. Dotted lines: blue when a reference feature matches two or more target features; Orange for the opposite.');
             % PLOT: RTdist vs RTref
             subplot(1,3,1)
             plot([0;max(refSet_i(:,1))],[multThresh.RT_intercept(1);max(refSet_i(:,1))*multThresh.RT_slope(1)+multThresh.RT_intercept(1)],'-','LineWidth',2,'Color',M2Scolor.dblue), hold on
@@ -323,8 +331,9 @@ else
             G1.Edges.nrNodesInCC = CC.nNodes(M2S_find_idxInReference(G1.Edges.CCnr,CC.nNodes(:,1)),2);
             G1.Edges.nrEdgesInCC = CC.nEdges(M2S_find_idxInReference(G1.Edges.CCnr,CC.nEdges(:,1)),2);
 
+            opt.G1 = G1;
             M2S_figureH(0.6,0.8);
-            set(gcf,'Name','Nodes as metabolomic features: Reference in dark blue, Target in light blue. Grey edges are matches within all thresholds, orange edges are matches outside log10FI threshold.')
+            set(gcf,'Name','Nodes as metabolomic features: Reference in dark blue, Target in light blue. Grey edges are matches within all thresholds, orange edges are matches outside log10FI threshold.');
             movegui(gcf,'center')
             p1 = plot(G1,'LineWidth',2,'EdgeColor',M2Scolor.lgrey); 
             highlight(p1,find(G1.Nodes.refNode==1),'NodeColor',M2Scolor.dblue,'MarkerSize',3);

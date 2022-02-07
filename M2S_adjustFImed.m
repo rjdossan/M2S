@@ -1,11 +1,17 @@
 function [newFItarget] = M2S_adjustFImed(FIref,FItarget,FIadj_method,plotOrNot)
-%% calculate the relation between medians
-% Adjust the target FImed to the reference FImed
-% INPUT
-% FIref and FItarget are row-matched single columns.
-% They come from matched matrices with columns RT, MZ, FI (feature intensity) median values)
+%% M2S_adjustFImed
+% calculate the relation between medians and Adjust the target FImed to
+% the reference FImed
+%
+% INPUT:
+% FIref, FItarget: row-matched single columns.
+% They come from matched matrices with columns RT, MZ, FI (feature intensity)
+% values or median values across the samples, e.g. representing the feature after peak picking)
 % FIadj_method = 'median'; %{'none','median','regression'}
-% plotOrNot = 1; %[0,1]
+% The 'median' (default) method simply subtracts the median of ref to target.
+% The 'regression' method adjust target to ref using linear regression.
+%
+% plotOrNot = 1; % 0 - no plots; 1 - plot
 %
 % 'FIadj_method' Methods description
 % 'median': Subtract difference between intensity log10 medians of FIref and
@@ -47,9 +53,9 @@ newFItarget = power(10,targetSet_Log10MedAdj); % RESULT
 %% PLOT
 if plotOrNot == 1
     load('M2ScolorScheme.mat');
-    M2S_figureH(0.6,0.4)
+    M2S_figureH(0.6,0.4);
     %figure ('Position',[1 1 1122 287])
-    set(gcf,'Name',['Adjustment of FItarget using the method of ',FIadj_method]), movegui(gcf,'center')
+    set(gcf,'Name',['Adjustment of FItarget using the method "',FIadj_method,'"']), movegui(gcf,'center')
     
     subplot(1,3,1), plot(log10(FIref),log10(FItarget),'.k'), axis tight; grid, hold on, xlabel('Log10 FIref'),ylabel('Log10 FItarget');
     plot([nanmin([log10(FIref);log10(FItarget)]);nanmax([log10(FIref);log10(FItarget)])],...

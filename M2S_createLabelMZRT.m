@@ -1,24 +1,33 @@
-%% Create RTMZ and a label for a dataset
-% This creates a label of the type "SLPOS_1250.1234_5.1234" (MS data m/z and RT in minutes)
-% or of the type "CPMG_5.1234" (NMR data)
+function [MZRTstring, repeatedStrings] = M2S_createLabelMZRT(stringForLabel,varargin)
+%% M2S_createLabelMZRT
+% create a label for each entry, e.g., {'SLPOS_1250.1234_5.1234'} 
+% (MS data m/z and RT in minutes) 
+%
+% [MZRT_str] = M2S_createLabelMZRT('LipidPosMode',m_z,RetentionTime)
 %
 % INPUT:
 % MS DATA: 
-%
-% Give a label, and the values for the two columns:
-% [X.VarInfo.MZRT_str] = M2S_createLabelMZRT('SLPOS',X.VarInfo.mzmed,X.VarInfo.rtmed)
-%
+% Input two separate columns (m/z values and retention time)
+% Given a label, and the values for the two columns:
+% [MZRT_str] = M2S_createLabelMZRT('LipidPositiveMode',m_z,RetentionTime)
+% NOTE: THE SECOND STRING ARGUMENT IS DIVIDED BY 60 IN CASE IT IS > 150,
+% to transform seconds to minutes.
+% NOTE: the numerical data is truncated (nor rounded) at the 4th digit
+% after the decimal point.
+% NOTE: The function works also for single column of values, eg in NMR ppm.
 % NMR DATA: 
-% 1. Give a label, and the ppm values
+% 1. Given a label, and the NMR ppm values
 % [X.VarInfo.MZRT_str] = M2S_createLabelMZRT('CPMG',X.VarInfo.ppm)
 % 
-% NOTE1: for string labels, use instead:
+% NOTE: for whole-string labels, use the following code instead of this function:
 % X.VarInfo.MZRT_str = strcat("BILISA","_",stringArray)
 %
-% NOTE2: THE SECOND STRING ARGUMENT IS DIVIDED BY 60 IN CASE IT IS > 100
-
-
-function [MZRTstring] = M2S_createLabelMZRT(stringForLabel,varargin)
+% OUTPUT:
+% MZRT_str: all labels as a cell
+%
+% M2S toolbox to match LCMS metabolomics features of untargeted datasets.
+% *** Rui Climaco Pinto ***
+% *** Imperial College London, 2021 ***
 
 % If there is only one argument, create only one string
 arg1 = varargin{1};
@@ -46,7 +55,7 @@ if length(varargin) == 2
     arg2 = varargin{2};
     
     %% force RT in minutes
-    if nanmax(arg2)>100
+    if nanmax(arg2)>150
         arg2=1/60*arg2;
     end
     
@@ -89,3 +98,14 @@ elseif length(varargin) == 2
     end
 end
 
+if length(unique(MZRTstring)) ~= length(MZRTstring)
+    disp('** WARNING: there are some repeated strings in the output **')
+    repeatedStrings = tabulate(MZRTstring);
+    repeatedStrings = table(string(repeatedStrings(:,1)),str2double(string(repeatedStrings(:,2))),str2double(string(repeatedStrings(:,3))),'VariableNames',{'MZRT_str','Count','Percent'});
+    repeatedStrings = sortrows(repeatedStrings,2,'descend');
+    repeatedStrings(repeatedStrings.Count == 1,:)=[];
+    disp(repeatedStrings)
+    disp('** WARNING: the above are repeated strings in the output **')
+else
+    disp('** GOOD NEWS: there are no repeated strings in the output **')
+end

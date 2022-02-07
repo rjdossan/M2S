@@ -1,16 +1,18 @@
-function [adjResiduals_X,residPercentile] = M2S_adjustResiduals(refSet,targetSet,Residuals_X,residPercentile)
-%% 3. NORMALIZE THE RESIDUALS DIVIDING BY A SPECIFIED FACTOR
+% [adjResiduals_X,residPercentile] = M2S_adjustResiduals(refSet,targetSet,Residuals_X,residPercentile)
+% Function M2S_adjustResiduals
+% This function is part of M2S toolbox to match metabolomics features across untargeted datasets.
+% 
 % Standardise the residuals in a similar fashion to dividing by stdev.
 %
 % - The residuals are in different units and need to be standardised in 
 % order to be combined to calculate the penalisation scores for each match.
 % This is done in a similar way to z-scoring (divide by stdev), by dividing
 % by the MAD of the residuals, or by a specific value of residuals in each dimension.
-% After this division, the value of the residual at the defined percentile is 1
+% After this division, the value of the residual at the defined point is 1
 % so it is easy to visualise the relevance of each of the dimension's residuals (RT/MZ/log10FI).
 %
 % There are several ways to call this function:
-% 1. Using the default "double MAD" method to find the residual. Different value is found for each dimension.
+% 1. Using the default "mad" method to find the residual. Different value is found for each dimension.
 % [adjResiduals_X,residPercentile] = M2S_adjustResiduals(refSet,targetSet,Residuals_X);
 %
 % 2. Defining the factor to divide the residuals by (residPercentile) 
@@ -20,6 +22,12 @@ function [adjResiduals_X,residPercentile] = M2S_adjustResiduals(refSet,targetSet
 % opt.adjustResiduals.residPercentile = [0.05,0.004,1.2]; % A residual value user-defined by inspecting figure "Residuals for RT adn MZ" 
 %
 % [adjResiduals_X,residPercentile] = M2S_adjustResiduals(refSet,targetSet,Residuals_X,opt.adjustResiduals.residPercentile)
+%
+
+% *** Rui Climaco Pinto ***
+% *** Imperial College London, 2021 ***
+
+function [adjResiduals_X,residPercentile] = M2S_adjustResiduals(refSet,targetSet,Residuals_X,residPercentile)
 
 fprintf('\n Started function M2D_adjustResiduals\n ')
 
@@ -35,7 +43,7 @@ targetSet(:,3) = log10(targetSet(:,3));
 
 %% Calculate the value of the residuals at the defined percentile
 
-%%  A - (Default) determination of residuals percentile separately in each dimension using double MAD
+%%  A - (Default) determination of residuals percentile separately in each dimension using MAD
 % Needs only the Residuals_X
 
 if sum (isnan(residPercentile))>0 % IF there is at least one NaN in residPercentile
@@ -64,9 +72,8 @@ elseif sum (isnan(residPercentile))==0
     % IF input is single value > 0 and < 100 then it is a percentile
     elseif (length(residPercentile) == 1 && residPercentile >0 && residPercentile <= 100) 
         disp('Method choice: residPercentile user defined, same for 3 dimensions')
-        residPercentile = repmat(residPercentile,1,3);
-        
-   
+        %residPercentile = repmat(residPercentile,1,3);
+  
     else 
         disp(' NOTE: residPercentile was not well defined')
         disp(' It can be NaN, zero, a number in ]0,1] or a row vector with 3 numbers')
@@ -74,14 +81,15 @@ elseif sum (isnan(residPercentile))==0
     
     
           
-    %%  IF (B) is chosen, user-defined residual value is the input:
-    if sum (isnan(residPercentile))==0 && length(residPercentile)==3
-        absResid_atPercentile = residPercentile;
-    % OTHERWISE
-    else 
+    %%  IF (C) is chosen, user-defined residual value is the input:
+    if (sum (isnan(residPercentile')))==0 && length(residPercentile)==1
         absResid_atPercentile = [prctile(abs(Residuals_X(:,1)),residPercentile(1,1)),...
-                                prctile(abs(Residuals_X(:,2)),residPercentile(1,2)),...
-                                prctile(abs(Residuals_X(:,3)),residPercentile(1,3))];% absolute residual value
+                                prctile(abs(Residuals_X(:,2)),residPercentile(1,1)),...
+                                prctile(abs(Residuals_X(:,3)),residPercentile(1,1))];% absolute residual value
+    % OTHERWISE B WAS CHOSEN
+    else 
+        
+        absResid_atPercentile = residPercentile;
     end
     % Normalize residuals by dividing by the residual value at specified percentile (similar to z-scoring)
     adjResiduals_X = Residuals_X ./ repmat(absResid_atPercentile,size(Residuals_X,1),1);
