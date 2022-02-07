@@ -309,7 +309,7 @@ writetable(targetTable,'M2S_datasetsMatched.xlsx','Sheet',2)
 
 filenameRef = 'referenceDataset.xlsx'
 filenameTarget = 'targetDataset.xlsx'
-[refDatasetMatched,targetDatasetMatched] = applyMatchingResults(filenameRef,filenameTarget,refFeatures_idx,targetFeatures_idx);
+[refDatasetMatched,targetDatasetMatched] = M2S_applyMatchingResults(filenameRef,filenameTarget,refFeatures_idx,targetFeatures_idx);
 
 
 %% ALTERNATIVELY:
