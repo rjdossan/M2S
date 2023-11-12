@@ -21,13 +21,13 @@ function [genAlg_Res,optBest] = M2S_genAlg_optimisation(refSet, targetSet, RTdis
 useSlope = 1; % Diagonal lines will be calculated as thresholds 
 
 % nSeeds are used as a basis for the definition of the initial population
-def_opt.nSeedsRT = 3;
+def_opt.nSeedsRT = 5;
 def_opt.nSeedsMZ = 5;
 
 % This divides the RTdist or MZdist regions in a number of sub-regions
-def_opt.numberIncrements = 21;
+def_opt.numberIncrements = 11;
 
-def_opt.n_initial_increments = 3; % defines the number of initial areas above and below the seed points in RT and MZ
+def_opt.n_initial_increments = 5; % defines the number of initial areas above and below the seed points in RT and MZ
 
 % The settings that stop the iterations:
 def_opt.max_genNr = 100;% max number of iterations allowed. 
@@ -48,7 +48,8 @@ def_opt.mutationProb=0.5; %Probability of mutation in each position (]0:1])
 % The strength of multiple match penalisation increases as
 % MultiM<HalfMultiM<SingleM, being the 'SingleM' the most penalised for
 % the occurrence of multiple matches
-def_opt.maximisationType = 'Other'; % {'Other','onlySingle','SingleM','HalfMultiM','MultiM'}
+% def_opt.maximisationType = 'Other'; % {'Other','onlySingle','SingleM','HalfMultiM','MultiM'}
+def_opt.maximisationType = 'F'; % {'Other','onlySingle','SingleM','HalfMultiM','MultiM'}
 
 
 % [newOpt] = M2S_addOptions(def_opt,opt)

@@ -52,9 +52,8 @@ function [refSet,targetSet,Xr_connIdx,Xt_connIdx,opt]=M2S_matchAll(refFeatures,t
 
 
 
-
 if nargin == 2
-    multThresh.MZ_intercept = 0.02;
+    multThresh.MZ_intercept = 0.03;
     multThresh.MZ_slope = 0;
     multThresh.RT_intercept = abs(max([refFeatures(:,1);targetFeatures(:,1)])-min([targetFeatures(:,1);refFeatures(:,1)]));
     multThresh.RT_slope = 0;
@@ -62,7 +61,7 @@ if nargin == 2
     multThresh.log10FI_slope = 0;
     multThresh.selfMatchingOrNot = 0;% May exist or not
     FIadjustMethod = 'none';
-    plotType = 1;
+    plotType = 3;
 elseif nargin == 3    
     FIadjustMethod = 'none';
     plotType = 1;
@@ -259,7 +258,7 @@ else
             xlabel('log10FI ref'),ylabel('log10FIdist') ; axis tight
 
             drawnow
-            elseif plotType == 2 % SHOW MULTIPLE MATCHES CONNECTIONS
+            elseif plotType >= 2 % SHOW MULTIPLE MATCHES CONNECTIONS
 
             M2S_figureH(0.8,0.5);
             set(gcf,'Name','Black dots represent matches within threshold, blue squares highlight multiple matches, orange dots are matches outside log10FI threshold. Dotted lines: blue when a reference feature matches two or more target features; Orange for the opposite.');
@@ -293,8 +292,27 @@ else
             plot([min(log10(refSet_i(:,3)));max(log10(refSet_i(:,3)))],[0,0],'k')
             plot(log10(refSet_i(FIdistOK_01==0,3)),log10(targetSet_i(FIdistOK_01==0,3))-log10(refSet_i(FIdistOK_01==0,3)),'.','MarkerSize',8,'Color',M2Scolor.orange)
             plot(log10(refSet_i(multMatch_idx,3)),log10(targetSet_i(multMatch_idx,3))-log10(refSet_i(multMatch_idx,3)),'o','MarkerSize',5,'Color',M2Scolor.lblue) % with multiple matches
-            xlabel('log10FI ref'),ylabel('log10FIdist') ; axis tight
+            xlabel('log10FI ref'),ylabel('log10FIdist') ; grid on; axis tight
             drawnow
+            
+            if plotType == 3
+            % PLOT: log10FItarget vs FIref         
+            figure;
+%             plot([min(log10(refSet_i(:,3)));max(log10(refSet_i(:,3)))],[ylimFImin(1);ylimFImin(2)],'-','LineWidth',2,'Color',M2Scolor.dblue), hold on
+%             plot([min(log10(refSet_i(:,3)));max(log10(refSet_i(:,3)))],[ylimFImax(1);ylimFImax(2)],'-','LineWidth',2,'Color',M2Scolor.dblue)
+
+            M2S_plotLinkedPoints(log10(refSet_i(:,3)),log10(targetSet_i(:,3)),Xr_connIdx_i,'ok',':',M2Scolor.lgrey,{'log10FI ref','log10FIdist'}), hold on
+            M2S_plotLinkedPoints(log10(refSet_i(:,3)),log10(targetSet_i(:,3)),Xt_connIdx_i,'ok',':',M2Scolor.orange,{'log10FI ref','log10FIdist'}), hold on
+            plot([min(log10(refSet_i(:,3)));max(log10(refSet_i(:,3)))],[0,0],'k')
+            plot(log10(refSet_i(FIdistOK_01==0,3)),log10(targetSet_i(FIdistOK_01==0,3)),'.','MarkerSize',8,'Color',M2Scolor.orange)
+            plot(log10(refSet_i(multMatch_idx,3)),log10(targetSet_i(multMatch_idx,3)),'o','MarkerSize',5,'Color',M2Scolor.lblue) % with multiple matches
+            xlabel('log10FI ref'),ylabel('log10FItarget') ; grid on; axis tight
+%             xlim([min([log10(refSet_i(multMatch_idx,3)); log10(targetSet_i(multMatch_idx,3))]),max([log10(refSet_i(multMatch_idx,3)); log10(targetSet_i(multMatch_idx,3))])]);
+%             ylim([min([log10(refSet_i(multMatch_idx,3)); log10(targetSet_i(multMatch_idx,3))]),max([log10(refSet_i(multMatch_idx,3)); log10(targetSet_i(multMatch_idx,3))])]);
+            xlim([min([log10(refSet_i(:,3)); log10(targetSet_i(:,3))]),max([log10(refSet_i(:,3)); log10(targetSet_i(:,3))])]);
+            ylim([min([log10(refSet_i(:,3)); log10(targetSet_i(:,3))]),max([log10(refSet_i(:,3)); log10(targetSet_i(:,3))])]);
+            drawnow
+            end
         end
         
         %% Create a GRAPH with all matches 

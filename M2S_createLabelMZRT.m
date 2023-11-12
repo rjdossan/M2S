@@ -25,10 +25,19 @@ function [MZRTstring, repeatedStrings] = M2S_createLabelMZRT(stringForLabel,vara
 % OUTPUT:
 % MZRT_str: all labels as a cell
 %
+%The equivalent function in R would use the following to truncate numbers:
+% trunc_number_n_decimals <- function(numberToTrunc, nDecimals){
+% numberToTrunc <- numberToTrunc + (10^-(nDecimals+5))
+% splitNumber <- strsplit(x=format(numberToTrunc, digits=20, format=f), split="\\.")[[1]]
+% decimalPartTrunc <- format(substr(x=splitNumber[2], start=1, stop=nDecimals),digits=nDecimals)
+% truncatedNumber <- paste0(splitNumber[1], ".", decimalPartTrunc)
+% return(truncatedNumber)}
+%
+%
 % M2S toolbox to match LCMS metabolomics features of untargeted datasets.
 % *** Rui Climaco Pinto ***
 % *** Imperial College London, 2021 ***
-
+%
 % If there is only one argument, create only one string
 arg1 = varargin{1};
 arg1_str=cell(length(arg1),1); 
@@ -55,9 +64,9 @@ if length(varargin) == 2
     arg2 = varargin{2};
     
     %% force RT in minutes
-    if nanmax(arg2)>150
-        arg2=1/60*arg2;
-    end
+%     if nanmax(arg2)>150
+%         arg2=1/60*arg2;
+%     end
     
     arg2_str=cell(length(arg2),1); 
     for a=1:length(arg2)

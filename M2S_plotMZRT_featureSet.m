@@ -47,6 +47,9 @@ if length(FIcolorOrNot) == 1
         if log10orNot == 1
             Hplot = scatter(featureSet(:,1),featureSet(:,2),marker_size*ones(size(featureSet,1),1),log10(featureSet(:,3)),'filled')
             disp('NOTE: FI (feature intensity) was log10 transformed to color the points')
+        elseif log10orNot == 0
+            Hplot = scatter(featureSet(:,1),featureSet(:,2),marker_size*ones(size(featureSet,1),1),featureSet(:,3),'filled')
+            disp('NOTE: FI (feature intensity) was NOT log10 transformed to color the points')
         elseif length(log10orNot) == size(featureSet,1)
             Hplot = scatter(featureSet(:,1),featureSet(:,2),marker_size*ones(size(featureSet,1),1),featureSet(:,3),'filled')
             disp('NOTE: FI (feature intensity) was NOT log10 transformed to color the points')
@@ -54,13 +57,16 @@ if length(FIcolorOrNot) == 1
             disp('log10orNot must be 0, 1 or a vector with same length as the number of rows of featureSet')
         end
         colorbar
-    else
-    plot(featureSet(:,1),featureSet(:,2),'.k','MarkerSize',marker_size)
+    else % FIcolorOrNot == 0
+        Hplot = plot(featureSet(:,1),featureSet(:,2),'.k','MarkerSize',marker_size)
     end
 else
     if log10orNot == 1
         Hplot = scatter(featureSet(:,1),featureSet(:,2),marker_size*ones(size(featureSet,1),1),log10(colorForPlot),'filled')
         disp('NOTE: color for plot was log10 transformed to color the points')
+    elseif log10orNot == 0
+        Hplot = scatter(featureSet(:,1),featureSet(:,2),marker_size*ones(size(featureSet,1),1),colorForPlot,'filled')
+        disp('NOTE: color for plot was NOT log10 transformed to color the points')
     elseif length(log10orNot) == size(featureSet,1)
         Hplot = scatter(featureSet(:,1),featureSet(:,2),marker_size*ones(size(featureSet,1),1),colorForPlot,'filled')
         disp('NOTE: color for plot was NOT log10 transformed to color the points')

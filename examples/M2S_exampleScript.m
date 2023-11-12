@@ -66,6 +66,7 @@ opt = struct;
 [refSet,targetSet,Xr_connIdx,Xt_connIdx, opt]=M2S_matchAll(refFeatures,targetFeatures);
         
 % Additional plot of results:
+figure
 Xsymbol = '.k';
 plotRow = 2; % y-axis is e.g. RTdist (1) or both RTdist and RT_target (2)
 M2S_plotDelta_matchedSets(refSet,targetSet,Xsymbol,plotRow)
@@ -114,7 +115,7 @@ end
 % Multiple match plots: plotType = 2 (with lines connecting clusters of multiple
 % matches containing the same feature). Also plots a network of all matches.
 
-plotType = 2; 
+plotType = 3; 
 [refSet,targetSet,Xr_connIdx,Xt_connIdx,opt]=M2S_matchAll(refFeatures,targetFeatures,opt.multThresh,opt.FIadjustMethod,plotType);
 
 % OPTIONAL: Obtain properties of current network of matches, with focus
@@ -150,6 +151,9 @@ focusDim = 1 % 1=RT; 2=MZ;
 % opt.pctPointsLoess = 0.1; options are 0 (no loess) or ]0,1], use for the 
 % loess a percentage of the total number of points (size(refSet,1)).
 % plotTypeResiduals = 1 % Options are 0 (no plot), 1 (default), 2 (extra)
+%
+% NOTE: M2S_calculateResiduals_v2 fits a curve on RT vs RT or MZ vs MZ (not
+% the RTdist vs RT or the MZdist vs MZ.
 
 if datasetName == "LNEG"
     opt.neighbours.nrNeighbors = 21;
@@ -162,8 +166,9 @@ elseif datasetName == "LPOS"
     opt.calculateResiduals.neighMethod = 'cross';
     opt.pctPointsLoess = 0.1;% loess with 10% of points
     plotTypeResiduals = 1
-    [Residuals_X,Residuals_trendline] = M2S_calculateResiduals(refSet,targetSet,Xr_connIdx,Xt_connIdx,opt.neighbours.nrNeighbors, opt.calculateResiduals.neighMethod,opt.pctPointsLoess,plotTypeResiduals)
+    [Residuals_X,Residuals_trendline] = M2S_calculateResiduals_v2(refSet,targetSet,Xr_connIdx,Xt_connIdx,opt.neighbours.nrNeighbors, opt.calculateResiduals.neighMethod,opt.pctPointsLoess,plotTypeResiduals)
 end
+
 
 
 %% Adjust the residuals
@@ -379,6 +384,20 @@ M2S_colorByY_ofSubplot(subplotNr,figH)
 % interceptSlope = M2S_calculateInterceptSlope()
 % 2- By inserting the values of the two points ([x1,y1],[x2,y2]) as below:
 % interceptSlope = M2S_calculateInterceptSlope([0,0.5],[12,-4.5]);
+
+[mousePointCoords, predictedPchip] = M2S_manualTrendline(x_pointsToPredict)
+% To be used for one dimension (e.g. RT) on one of the plots after M2S_matchAll
+% Objective: % manually define x,y points, create a curve using them and
+% predict the y-coordinates of a set of new x-values.
+% The values of predicted Pchip can then be subtracted from the target in
+% the dimension fitted (e.g. RT).
+%
+% INPUT:
+% x_pointsToPredict: x-points vector to predict (can be [])
+%
+% OUTPUT:
+% mousePointCoords: the coordinates chosen with the mouse
+% predictedPchip: y-coordinates predicted using polynomial cubic interpolation
 
 %% SUPPORT FUNCTIONS FOR OPTIMISATION
 % Not final. Work in progress

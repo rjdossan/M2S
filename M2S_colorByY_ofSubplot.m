@@ -2,7 +2,7 @@
 % Function M2S_colorByY_ofSubplot
 % This function is part of M2S toolbox to match metabolomics features across untargeted datasets.
 % 
-% Colour all subplots in a figure by teh y-values of one one those plots,
+% Colour all subplots in a figure by the y-values of one one those plots,
 % or by a colour vector.
 %
 % There are several ways to call this function:

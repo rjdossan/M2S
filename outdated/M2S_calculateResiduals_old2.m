@@ -12,8 +12,6 @@
 % nrNeighbors: a percentage of the total of features in the refSet (e.g. 0.05) or a specific number (e.g. 25).
 % neighMethod:method to calculate inter-dataset shifts can be "cross" (uses RT, MZ, FI)
 % or (default) "circle" (uses only RT, MZ). "Circle" does not subtract the shift from FI.
-% It has been updated 12Oct2023 to use a robust loess to calculate the
-% inter-dataset shift trend in both methods (though without FI in "circle")
 % plotOrNot: 0 - no plots; 1 - default plots; 2 - extra plots
 % NOTE: % The following call makes automatic choice of neighbour number:
 % [Residuals_X,Residuals_trendline] = M2S_findNeighTrendsResiduals(ref_MatchSet, target_MatchSet, refSet, targetSet, Xr_connIdx_inMatchSet, Xr_connIdx) 
@@ -144,23 +142,17 @@ median_FIdist_neighborsTR = nanmedian(FIdist_neighborsTR,2);% REPRESENTS TRENDLI
 % pctPointsLoess is a percentage ]0-0.75[ of the number of points in the
 % reference matched dataset (refSet), to define span of loess.
 % e.g. use pctPointsLoess = 0.3
-if pctPointsLoess > 0 && pctPointsLoess <0.999
+if pctPointsLoess > 0 && pctPointsLoess <0.75
 
     %% Use robust loess to calculate trend (only for "cross" method)
    
     % nrPointsLoess = 0.1 * length(unique(refSet(:,1)));
     nrPointsLoess = round(pctPointsLoess * length(unique(refSet(:,1))));
-    median_RTdist_neighborsTR_v2 = smooth(refSet(:,1),refSet(:,1)+median_RTdist_neighborsTR,nrPointsLoess,'rloess');% to do loess
-    median_MZdist_neighborsTR_v2 = smooth(refSet(:,2),refSet(:,2)+median_MZdist_neighborsTR,nrPointsLoess,'rloess');% to do loess
+    median_RTdist_neighborsTR = smooth(refSet(:,1),median_RTdist_neighborsTR,nrPointsLoess,'rloess');% to do loess
+    median_MZdist_neighborsTR = smooth(refSet(:,2),median_MZdist_neighborsTR,nrPointsLoess,'rloess');% to do loess
     if strcmp(neighMethod,'cross')% method 'circle' does not calculate FI
-        median_FIdist_neighborsTR_v2 = smooth(refSet(:,3),refSet(:,3)+median_FIdist_neighborsTR,nrPointsLoess,'rloess');% to do loess
-    else
-        median_FIdist_neighborsTR_v2 = refSet(:,3);
+        median_FIdist_neighborsTR = smooth(refSet(:,3),median_FIdist_neighborsTR,nrPointsLoess,'rloess');% to do loess
     end
-    median_RTdist_neighborsTR = median_RTdist_neighborsTR_v2 - refSet(:,1);
-    median_MZdist_neighborsTR = median_MZdist_neighborsTR_v2 - refSet(:,2);
-    median_FIdist_neighborsTR = median_FIdist_neighborsTR_v2 - refSet(:,3);
-    
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

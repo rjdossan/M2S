@@ -30,7 +30,8 @@ else
         end
     end
 end
+
 if sum(isnan(idx_inReference))>0
-    fprintf('\n *** There are %d NaN indices in the vector (strings not found) ***\n',sum(isnan(idx_inReference)));
+    %fprintf('\n *** There are %d NaN indices in the vector (strings not found) ***\n',sum(isnan(idx_inReference)));
 end
     
