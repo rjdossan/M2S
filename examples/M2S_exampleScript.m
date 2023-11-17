@@ -155,6 +155,9 @@ focusDim = 1 % 1=RT; 2=MZ;
 % NOTE: M2S_calculateResiduals_v2 fits a curve on RT vs RT or MZ vs MZ (not
 % the RTdist vs RT or the MZdist vs MZ.
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 if datasetName == "LNEG"
     opt.neighbours.nrNeighbors = 21;
     opt.calculateResiduals.neighMethod = 'circle';
@@ -166,7 +169,7 @@ elseif datasetName == "LPOS"
     opt.calculateResiduals.neighMethod = 'cross';
     opt.pctPointsLoess = 0.1;% loess with 10% of points
     plotTypeResiduals = 1
-    [Residuals_X,Residuals_trendline] = M2S_calculateResiduals_v2(refSet,targetSet,Xr_connIdx,Xt_connIdx,opt.neighbours.nrNeighbors, opt.calculateResiduals.neighMethod,opt.pctPointsLoess,plotTypeResiduals)
+    [Residuals_X,Residuals_trendline] = M2S_calculateResiduals(refSet,targetSet,Xr_connIdx,Xt_connIdx,opt.neighbours.nrNeighbors, opt.calculateResiduals.neighMethod,opt.pctPointsLoess,plotTypeResiduals)
 end
 
 

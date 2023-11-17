@@ -14,8 +14,6 @@
 % or (default) "circle" (uses only RT, MZ). "Circle" does not subtract the shift from FI.
 % It has been updated 12Oct2023 to use a robust loess to calculate the
 % inter-dataset shift trend in both methods (though without FI in "circle")
-% Update 14Nov2023: if nrNeighbours=1 it uses the actual variable, rather
-% than its closest neighbour.
 % plotOrNot: 0 - no plots; 1 - default plots; 2 - extra plots
 % NOTE: % The following call makes automatic choice of neighbour number:
 % [Residuals_X,Residuals_trendline] = M2S_findNeighTrendsResiduals(ref_MatchSet, target_MatchSet, refSet, targetSet, Xr_connIdx_inMatchSet, Xr_connIdx) 
@@ -28,7 +26,7 @@
 %   Imperial College London
 
 
-function [Residuals_X,Residuals_trendline] = M2S_calculateResiduals_v2 ...
+function [Residuals_X,Residuals_trendline] = M2S_calculateResiduals ...
     (refSet,targetSet,Xr_connIdx,Xt_connIdx, nrNeighbors, neighMethod, pctPointsLoess, plotOrNot)
 
 
@@ -101,15 +99,6 @@ if strcmp(neighMethod,'cross')
         FIdist_neighborsTR(:,columnNr) = target_MatchSet(idx_neighbors_Ref_FI(:,columnNr),3) - ref_MatchSet(idx_neighbors_Ref_FI(:,columnNr),3);
     end
       
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% THIS PART OVERRIDES THE PREVIOUS CALCULATION
-    %% If nrNeighbors == 1, we use the actual feature, no neighbours
-    if nrNeighbors == 1
-        RTdist_neighborsTR = targetSet(:,1) - refSet(:,1);
-        MZdist_neighborsTR = targetSet(:,2) - refSet(:,2);
-        FIdist_neighborsTR = targetSet(:,3) - refSet(:,3);
-    end
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     waitbar(1,wb1,'Done!','Name','Info');
     pause(1)
     close(wb1);
@@ -134,19 +123,6 @@ elseif strcmp(neighMethod,'circle')
         %FIdist_neighborsTR(:,columnNr) = target_MatchSet(idx_neighbors_Ref(:,columnNr),3) - ref_MatchSet(idx_neighbors_Ref(:,columnNr),3);       
     end
     FIdist_neighborsTR = zeros(size(MZdist_neighborsTR));% defined as zero
-
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% THIS PART OVERRIDES THE PREVIOUS CALCULATION
-    %% If nrNeighbors == 1, we use the actual feature, no neighbours
-    if nrNeighbors == 1
-        RTdist_neighborsTR = targetSet(:,1) - refSet(:,1);
-        MZdist_neighborsTR = targetSet(:,2) - refSet(:,2);
-        FIdist_neighborsTR = zeros(size(MZdist_neighborsTR));% defined as zero
-    end
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
     waitbar(1,wb1,'Done!','Name','Info');
     pause(1)
     close(wb1);
@@ -158,19 +134,11 @@ end
 % neighbours from reference to target (SHIFTS TRENDLINE). Normalize.
 % NOTICE that in "circle" method the median_FIdist_neighborsTR is zero (does not correct FI_dist_TR)
 
-
 median_RTdist_neighborsTR = nanmedian(RTdist_neighborsTR,2);% REPRESENTS TRENDLINE OF RT(target-ref)
 median_MZdist_neighborsTR = nanmedian(MZdist_neighborsTR,2);% REPRESENTS TRENDLINE OF MZ(target-ref)
 median_FIdist_neighborsTR = nanmedian(FIdist_neighborsTR,2);% REPRESENTS TRENDLINE OF FI(target-ref)
 
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% THIS PART OVERRIDES THE PREVIOUS CALCULATION
-%% If nrNeighbors == 1, we use the actual feature, no neighbours
-if nrNeighbors == 1
-    median_RTdist_neighborsTR = RTdist_neighborsTR;
-    median_MZdist_neighborsTR = MZdist_neighborsTR;
-    median_FIdist_neighborsTR = FIdist_neighborsTR;
-end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % if strcmp(neighMethod,'cross')
 % pctPointsLoess is a percentage ]0-0.75[ of the number of points in the
