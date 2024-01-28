@@ -20,6 +20,8 @@
 
 function [mousePointCoords, predictedPchip] = M2S_manualTrendline(x_pointsToPredict)
 
+
+
 fprintf('\nFunction to define a trendline in a plot.\n')
 fprintf('The last figure to be clicked is the currently active figure (gcf).\n')
 fprintf('Choose multiple points in the plot, starting from the left, using mouse left-click.\n')
@@ -66,6 +68,7 @@ elseif nargin == 1
     hold on, 
     plot(x_pointsToPredict(:,1),predictedPchip,'*b')
 end
+
 
 
 

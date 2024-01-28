@@ -50,14 +50,16 @@ elseif nargin > 2
 end
 
 if nargin <= 2
-    if prod(ylim) <= 0
+    % if prod(ylim) <= 0
+    % plot(x_vals,y_lim',line_color)
+    % end
     plot(x_vals,y_lim',line_color)
-    end
 
-    if prod(xlim) <=0
-    plot(x_lim',y_vals,line_color)
-    end
-    
+    % if prod(xlim) <=0
+    % plot(x_lim',y_vals,line_color)
+    % end
+        plot(x_lim',y_vals,line_color)
+
     if isnan(xy_vals(1))
         plot(xlim',y_vals,line_color)
     end

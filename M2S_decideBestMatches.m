@@ -168,9 +168,13 @@ close(wb2);% status bar
 eL_Best_singleMatches = eL_all(eL_all.nrEdgesInSameCC == 1,:);
 eL_Best_singleMatches.nrIterations = zeros(size(eL_Best_singleMatches,1),1);
 eL_Best.nrIterations = ones(size(eL_Best,1),1);
-% if ~isempty(eL_Best.nrIterations) %*** TO NOT CRASH WHEN THERE ARE NO MULTIPLE MATCHES
-% NEED TO REVIEW THIS!!!
-eL_Best = [eL_Best_singleMatches;eL_Best];
+
+
+if ~isempty(eL_Best.nrIterations)
+    eL_Best = [eL_Best_singleMatches;eL_Best];
+else
+    eL_Best = eL_Best_singleMatches;
+end
 eL_Best = sortrows(eL_Best,'inCCnr');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
